@@ -28,7 +28,9 @@ export function ScmProviderPills({providers, onInstall}: ScmProviderPillsProps) 
         columns={{
           xs: '1fr 1fr',
           md: primaryProviders.length
-            ? `repeat(${primaryProviders.length}, 1fr) min-content`
+            ? moreProviders.length > 0
+              ? `repeat(${primaryProviders.length}, 1fr) min-content`
+              : `repeat(${primaryProviders.length}, 1fr)`
             : 'min-content',
         }}
         rows={{xs: 2}}
