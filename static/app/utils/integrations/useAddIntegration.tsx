@@ -72,10 +72,10 @@ function getApiPipelineProvider(
 // Legacy dialog strategy (uses PostMessageContext)
 // ---------------------------------------------------------------------------
 
-function useLegacyDialogStrategy() {
-  const organization = useOrganization();
+function useLegacyDialogStrategy(organization: Organization) {
   const subscribe = usePostMessageCallback();
-  const unsubscribeRef = useRef<() => void | null>(null);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const dialogRef = useRef<Window | null>(null);
 
   const startFlow = useCallback(
     ({
@@ -110,13 +110,15 @@ function useLegacyDialogStrategy() {
       const installUrl = `${url}?${qs.stringify(query)}`;
       const opts = `scrollbars=yes,width=${width},height=${height},top=${top},left=${left}`;
 
-      let dialog = window.open(installUrl, name, opts);
+      const dialog = window.open(installUrl, name, opts);
       if (!dialog) {
         // Popup was blocked?
         return;
       }
       dialog?.focus();
+      dialogRef.current = dialog;
 
+      unsubscribeRef.current?.();
       unsubscribeRef.current = subscribe((message: MessageEvent) => {
         const validOrigins = [
           ConfigStore.get('links').sentryUrl,
@@ -131,7 +133,7 @@ function useLegacyDialogStrategy() {
         }
 
         const {success, data} = message.data;
-        dialog = null;
+        dialogRef.current = null;
         unsubscribeRef.current?.();
         unsubscribeRef.current = null;
 
@@ -158,7 +160,7 @@ function useLegacyDialogStrategy() {
 
   useEffect(() => {
     return () => {
-      // Unsubscribe if we unmount after having started the flow
+      dialogRef.current?.close();
       unsubscribeRef.current?.();
       unsubscribeRef.current = null;
     };
@@ -170,9 +172,10 @@ function useLegacyDialogStrategy() {
 // Public hook: selects between pipeline modal and legacy dialog
 // ---------------------------------------------------------------------------
 
-export function useAddIntegration() {
-  const organization = useOrganization();
-  const {startFlow: legacyStartFlow} = useLegacyDialogStrategy();
+export function useAddIntegration(organizationOverride?: Organization) {
+  const contextOrganization = useOrganization();
+  const organization = organizationOverride ?? contextOrganization;
+  const {startFlow: legacyStartFlow} = useLegacyDialogStrategy(organization);
 
   const startFlow = useCallback(
     (params: AddIntegrationParams) => {

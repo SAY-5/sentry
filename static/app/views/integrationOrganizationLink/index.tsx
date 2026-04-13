@@ -241,6 +241,7 @@ export default function IntegrationOrganizationLink() {
               disabled={disabled}
               disabledReason={disabledReason}
               finishInstallation={finishInstallation}
+              organization={organization}
             />
           </PostMessageProvider>
         )}
@@ -412,6 +413,7 @@ function AddIntegrationButton({
   disabled,
   disabledReason,
   finishInstallation,
+  organization,
 }: {
   disabled: boolean;
   disabledReason: React.ReactNode;
@@ -420,8 +422,9 @@ function AddIntegrationButton({
   onInstall: (data: Integration) => void;
   provider: IntegrationProvider;
   installationId?: string;
+  organization?: Organization | null;
 }) {
-  const {startFlow} = useAddIntegration();
+  const {startFlow} = useAddIntegration(organization ?? undefined);
 
   return (
     <ButtonWrapper>
