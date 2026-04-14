@@ -3,8 +3,7 @@ import {Outlet} from 'react-router-dom';
 
 import {ContinuousProfileHeader} from 'sentry/components/profiling/continuousProfileHeader';
 import type {RequestState} from 'sentry/types/core';
-import type {EventTransaction} from 'sentry/types/event';
-import {useSentryEvent} from 'sentry/utils/profiling/hooks/useSentryEvent';
+import {useTransaction} from 'sentry/utils/profiling/hooks/useTransaction';
 import {decodeScalar} from 'sentry/utils/queryString';
 import {useLocation} from 'sentry/utils/useLocation';
 import {useOrganization} from 'sentry/utils/useOrganization';
@@ -50,12 +49,7 @@ export default function ProfileAndTransactionProvider(): React.ReactElement {
     type: eventId ? 'initial' : 'empty',
   });
 
-  const profileTransaction = useSentryEvent<EventTransaction>(
-    organization.slug,
-    projectSlug,
-    eventId,
-    !eventId // disable if no event id
-  );
+  const transactionResult = useTransaction(eventId || undefined);
 
   return (
     <ContinuousProfileProvider
@@ -65,12 +59,10 @@ export default function ProfileAndTransactionProvider(): React.ReactElement {
       profile={profile}
       setProfile={setProfile}
     >
-      <ProfileTransactionContext value={profileTransaction}>
+      <ProfileTransactionContext value={transactionResult}>
         <LayoutPageWithHiddenFooter flex={1}>
           <ContinuousProfileHeader
-            transaction={
-              profileTransaction.type === 'resolved' ? profileTransaction.data : null
-            }
+            transactionSpan={transactionResult.data.transactionSpan}
           />
           <Outlet />
         </LayoutPageWithHiddenFooter>

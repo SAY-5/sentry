@@ -3,23 +3,31 @@ import {Outlet} from 'react-router-dom';
 
 import {ProfileHeader} from 'sentry/components/profiling/profileHeader';
 import type {RequestState} from 'sentry/types/core';
-import type {EventTransaction} from 'sentry/types/event';
 import {isSchema, isSentrySampledProfile} from 'sentry/utils/profiling/guards/profile';
-import {useSentryEvent} from 'sentry/utils/profiling/hooks/useSentryEvent';
+import {useTransaction} from 'sentry/utils/profiling/hooks/useTransaction';
 import {useOrganization} from 'sentry/utils/useOrganization';
 import {useParams} from 'sentry/utils/useParams';
 import {LayoutPageWithHiddenFooter} from 'sentry/views/profiling/layoutPageWithHiddenFooter';
 
 import {ProfileTransactionContext, TransactionProfileProvider} from './profilesProvider';
 
-function getTransactionId(input: Profiling.ProfileInput): string | null {
+function getIdentifiers(input: Profiling.ProfileInput): {
+  traceId?: string;
+  transactionId?: string;
+} {
   if (isSchema(input)) {
-    return input.metadata.transactionID;
+    return {
+      transactionId: input.metadata.transactionID || undefined,
+      traceId: input.metadata.traceID || undefined,
+    };
   }
   if (isSentrySampledProfile(input)) {
-    return input.transaction.id;
+    return {
+      transactionId: input.transaction.id || undefined,
+      traceId: input.transaction.trace_id || undefined,
+    };
   }
-  return null;
+  return {transactionId: undefined, traceId: undefined};
 }
 
 export default function ProfileAndTransactionProvider(): React.ReactElement {
@@ -32,11 +40,12 @@ export default function ProfileAndTransactionProvider(): React.ReactElement {
     type: 'initial',
   });
 
-  const profileTransaction = useSentryEvent<EventTransaction>(
-    organization.slug,
-    projectSlug,
-    profile.type === 'resolved' ? getTransactionId(profile.data) : null
-  );
+  const {transactionId, traceId} =
+    profile.type === 'resolved'
+      ? getIdentifiers(profile.data)
+      : {transactionId: undefined, traceId: undefined};
+
+  const transactionResult = useTransaction(transactionId, traceId);
 
   return (
     <TransactionProfileProvider
@@ -46,14 +55,12 @@ export default function ProfileAndTransactionProvider(): React.ReactElement {
       profile={profile}
       setProfile={setProfile}
     >
-      <ProfileTransactionContext value={profileTransaction}>
+      <ProfileTransactionContext value={transactionResult}>
         <LayoutPageWithHiddenFooter flex={1}>
           <ProfileHeader
             eventId={params.eventId!}
             projectId={projectSlug}
-            transaction={
-              profileTransaction.type === 'resolved' ? profileTransaction.data : null
-            }
+            transactionSpan={transactionResult.data.transactionSpan}
           />
           <Outlet />
         </LayoutPageWithHiddenFooter>

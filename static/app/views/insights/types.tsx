@@ -54,6 +54,7 @@ export enum SpanFields {
   TRANSACTION_SPAN_ID = 'transaction.span_id',
   SPAN_SELF_TIME = 'span.self_time',
   TRACE = 'trace',
+  TRACE_PARENT_SPAN = 'trace.parent_span',
   PROFILE_ID = 'profile_id',
   PROFILEID = 'profile.id',
   REPLAYID = 'replayId',
@@ -70,6 +71,7 @@ export enum SpanFields {
   BROWSER_NAME = 'browser.name',
   ENVIRONMENT = 'environment',
   ORIGIN_TRANSACTION = 'origin.transaction',
+  TRANSACTION_EVENT_ID = 'transaction.event_id',
   TRANSACTION_METHOD = 'transaction.method',
   TRANSACTION_OP = 'transaction.op',
   PROFILER_ID = 'profiler.id',
@@ -148,6 +150,8 @@ export enum SpanFields {
   FROZEN_FRAMES_RATE = 'measurements.frames_frozen_rate',
   SLOW_FRAMES_RATE = 'measurements.frames_slow_rate',
   DEVICE_CLASS = 'device.class',
+  DEVICE_MODEL = 'device.model',
+  DEVICE_MANUFACTURER = 'device.manufacturer',
   APP_START_COLD = 'measurements.app_start_cold',
   APP_START_WARM = 'measurements.app_start_warm',
   MOBILE_FRAMES_DELAY = 'mobile.frames_delay',
@@ -293,6 +297,7 @@ export type NonNullableStringFields =
   | SpanFields.MCP_RESOURCE_URI
   | SpanFields.MCP_PROMPT_NAME
   | SpanFields.TRACE
+  | SpanFields.TRACE_PARENT_SPAN
   | SpanFields.PROFILEID
   | SpanFields.PROFILE_ID
   | SpanFields.REPLAYID
@@ -310,6 +315,8 @@ export type NonNullableStringFields =
   | SpanFields.SDK_NAME
   | SpanFields.SDK_VERSION
   | SpanFields.DEVICE_CLASS
+  | SpanFields.DEVICE_MODEL
+  | SpanFields.DEVICE_MANUFACTURER
   | SpanFields.SPAN_ACTION
   | SpanFields.SPAN_DOMAIN
   | SpanFields.MESSAGING_MESSAGE_BODY_SIZE
@@ -325,8 +332,10 @@ export type NonNullableStringFields =
   | SpanFields.SPAN_SYSTEM
   | SpanFields.TIMESTAMP
   | SpanFields.TRANSACTION
+  | SpanFields.TRANSACTION_EVENT_ID
   | SpanFields.TRANSACTION_METHOD
   | SpanFields.RELEASE
+  | SpanFields.ENVIRONMENT
   | SpanFields.OS_NAME
   | SpanFields.SPAN_STATUS_CODE
   | SpanFields.SPAN_AI_PIPELINE_GROUP
