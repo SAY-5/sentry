@@ -315,6 +315,9 @@ class Occurrences(rpc_dataset_common.RPCBase):
         response = snuba_rpc.trace_item_stats_rpc(stats_request)
         stats = []
 
+        from sentry.search.eap.occurrences.attributes import (
+            OCCURRENCE_STATS_EXCLUDED_ATTRIBUTES_PUBLIC_ALIAS,
+        )
         from sentry.search.eap.utils import can_expose_attribute, translate_internal_to_public_alias
 
         for result in response.results:
@@ -340,6 +343,8 @@ class Occurrences(rpc_dataset_common.RPCBase):
                                 SupportedTraceItemType.OCCURRENCES,
                             )
                             public_alias = public_alias or attribute.attribute_name
+                            if public_alias in OCCURRENCE_STATS_EXCLUDED_ATTRIBUTES_PUBLIC_ALIAS:
+                                continue
                             attrs[public_alias].append(
                                 {"label": bucket.label, "value": bucket.value}
                             )
