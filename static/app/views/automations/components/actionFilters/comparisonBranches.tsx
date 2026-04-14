@@ -11,18 +11,25 @@ import {
 import {useAutomationBuilderErrorContext} from 'sentry/views/automations/components/automationBuilderErrorContext';
 import {useDataConditionNodeContext} from 'sentry/views/automations/components/dataConditionNodes';
 
-export function CountBranch() {
+interface BranchProps {
+  comparisonIntervalChoices?: typeof COMPARISON_INTERVAL_CHOICES;
+  intervalChoices?: typeof INTERVAL_CHOICES;
+}
+
+export function CountBranch({intervalChoices}: BranchProps) {
   return tct('more than [value] [interval]', {
     value: <ValueField />,
-    interval: <IntervalField />,
+    interval: <IntervalField intervalChoices={intervalChoices} />,
   });
 }
 
-export function PercentBranch() {
+export function PercentBranch({intervalChoices, comparisonIntervalChoices}: BranchProps) {
   return tct('[value] higher [interval] compared to [comparison_interval]', {
     value: <PercentValueField />,
-    interval: <IntervalField />,
-    comparison_interval: <ComparisonIntervalField />,
+    interval: <IntervalField intervalChoices={intervalChoices} />,
+    comparison_interval: (
+      <ComparisonIntervalField comparisonIntervalChoices={comparisonIntervalChoices} />
+    ),
   });
 }
 
@@ -53,7 +60,11 @@ function PercentValueField() {
   );
 }
 
-function IntervalField() {
+function IntervalField({
+  intervalChoices = INTERVAL_CHOICES,
+}: {
+  intervalChoices?: typeof INTERVAL_CHOICES;
+}) {
   const {condition, condition_id, onUpdate} = useDataConditionNodeContext();
   const {removeError} = useAutomationBuilderErrorContext();
 
@@ -62,7 +73,7 @@ function IntervalField() {
       name={`${condition_id}.comparison.interval`}
       aria-label={t('Interval')}
       value={condition.comparison.interval}
-      options={INTERVAL_CHOICES}
+      options={intervalChoices}
       onChange={(option: SelectValue<string>) => {
         onUpdate({comparison: {...condition.comparison, interval: option.value}});
         removeError(condition.id);
@@ -71,7 +82,11 @@ function IntervalField() {
   );
 }
 
-function ComparisonIntervalField() {
+function ComparisonIntervalField({
+  comparisonIntervalChoices = COMPARISON_INTERVAL_CHOICES,
+}: {
+  comparisonIntervalChoices?: typeof COMPARISON_INTERVAL_CHOICES;
+}) {
   const {condition, condition_id, onUpdate} = useDataConditionNodeContext();
   const {removeError} = useAutomationBuilderErrorContext();
 
@@ -80,7 +95,7 @@ function ComparisonIntervalField() {
       name={`${condition_id}.comparison.comparisonInterval`}
       aria-label={t('Comparison interval')}
       value={condition.comparison.comparisonInterval}
-      options={COMPARISON_INTERVAL_CHOICES}
+      options={comparisonIntervalChoices}
       onChange={(option: SelectValue<string>) => {
         onUpdate({
           comparison: {...condition.comparison, comparisonInterval: option.value},

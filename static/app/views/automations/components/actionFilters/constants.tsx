@@ -106,7 +106,9 @@ export enum Level {
 export enum Interval {
   ONE_MINUTE = '1m',
   FIVE_MINUTES = '5m',
+  TEN_MINUTES = '10m',
   FIFTEEN_MINUTES = '15m',
+  THIRTY_MINUTES = '30m',
   ONE_HOUR = '1h',
   ONE_DAY = '1d',
   ONE_WEEK = '1w',
@@ -188,4 +190,20 @@ export const COMPARISON_INTERVAL_CHOICES = [
   {value: Interval.ONE_DAY, label: t('one day ago')},
   {value: Interval.ONE_WEEK, label: t('one week ago')},
   {value: Interval.THIRTY_DAYS, label: t('30 days ago')},
+];
+
+// Supported values defined in PERCENT_INTERVALS in src/sentry/rules/conditions/event_frequency.py
+export const PERCENT_SESSIONS_INTERVAL_CHOICES = [
+  {value: Interval.ONE_MINUTE, label: t('in one minute')},
+  {value: Interval.FIVE_MINUTES, label: t('in 5 minutes')},
+  {value: Interval.TEN_MINUTES, label: t('in 10 minutes')},
+  {value: Interval.THIRTY_MINUTES, label: t('in 30 minutes')},
+  {value: Interval.ONE_HOUR, label: t('in one hour')},
+];
+
+export const PERCENT_SESSIONS_COMPARISON_INTERVAL_CHOICES = [
+  {value: Interval.FIVE_MINUTES, label: t('5 minutes ago')},
+  {value: Interval.TEN_MINUTES, label: t('10 minutes ago')},
+  {value: Interval.THIRTY_MINUTES, label: t('30 minutes ago')},
+  {value: Interval.ONE_HOUR, label: t('one hour ago')},
 ];
