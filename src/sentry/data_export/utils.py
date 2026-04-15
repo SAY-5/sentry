@@ -8,6 +8,7 @@ from typing import Any, Iterator, Literal
 from google.protobuf.timestamp_pb2 import Timestamp
 from sentry_protos.snuba.v1.endpoint_trace_items_pb2 import ExportTraceItemsResponse
 from sentry_protos.snuba.v1.trace_item_pb2 import AnyValue, TraceItem
+
 from sentry.data_export.base import ExportError
 from sentry.search.eap.types import SupportedTraceItemType
 from sentry.search.eap.utils import (
@@ -20,7 +21,6 @@ from sentry.snuba import discover
 from sentry.utils import metrics, snuba
 from sentry.utils.sdk import capture_exception
 from sentry.utils.snuba_rpc import SnubaRPCRateLimitExceeded
-
 
 
 def eap_storage_scalar_type_from_protobuf(
@@ -37,6 +37,7 @@ def eap_storage_scalar_type_from_protobuf(
     if which in ("array_value", "kvlist_value"):
         return None
     return None
+
 
 # Adapted into decorator from 'src/sentry/api/endpoints/organization_events.py'
 def handle_snuba_errors(
