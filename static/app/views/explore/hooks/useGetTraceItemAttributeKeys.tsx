@@ -2,11 +2,11 @@ import {usePageFilters} from 'sentry/components/pageFilters/usePageFilters';
 import type {Tag, TagCollection} from 'sentry/types/group';
 import {useMutation, useQueryClient} from 'sentry/utils/queryClient';
 import {TRACE_ITEM_ATTRIBUTE_STALE_TIME} from 'sentry/views/explore/constants';
-import type {UseTraceItemAttributeBaseProps} from 'sentry/views/explore/types';
 import {
   getTraceItemTagCollection,
   useTraceItemAttributeKeysOptions,
-} from 'sentry/views/explore/utils/traceItemAttributeKeysOptions';
+} from 'sentry/views/explore/hooks/useTraceItemAttributeKeysOptions';
+import type {UseTraceItemAttributeBaseProps} from 'sentry/views/explore/types';
 
 interface UseGetTraceItemAttributeKeysProps extends UseTraceItemAttributeBaseProps {
   projectIds?: Array<string | number>;
