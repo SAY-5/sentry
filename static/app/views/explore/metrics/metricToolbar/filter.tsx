@@ -6,6 +6,7 @@ import {
 } from 'sentry/components/searchQueryBuilder/context';
 import type {TagCollection} from 'sentry/types/group';
 import {FieldKind} from 'sentry/utils/fields';
+import {useQuery} from 'sentry/utils/queryClient';
 import {useOrganization} from 'sentry/utils/useOrganization';
 import {
   TraceItemSearchQueryBuilder,
@@ -17,7 +18,6 @@ import {
   SENTRY_TRACEMETRIC_NUMBER_TAGS,
   SENTRY_TRACEMETRIC_STRING_TAGS,
 } from 'sentry/views/explore/constants';
-import {useTraceItemAttributeKeys} from 'sentry/views/explore/hooks/useTraceItemAttributeKeys';
 import {HiddenTraceMetricSearchFields} from 'sentry/views/explore/metrics/constants';
 import {type TraceMetric} from 'sentry/views/explore/metrics/metricQuery';
 import {MetricsTabSeerComboBox} from 'sentry/views/explore/metrics/metricsTabSeerComboBox';
@@ -27,6 +27,10 @@ import {
   useSetQueryParamsQuery,
 } from 'sentry/views/explore/queryParams/context';
 import {TraceItemDataset} from 'sentry/views/explore/types';
+import {
+  selectTraceItemTagCollection,
+  useTraceItemAttributeKeysOptions,
+} from 'sentry/views/explore/utils/traceItemAttributeKeysOptions';
 
 const EMPTY_TAG_COLLECTION: TagCollection = {};
 const EMPTY_ALIASES: TagCollection = {};
@@ -67,23 +71,35 @@ export function Filter({traceMetric}: FilterProps) {
 
   const traceMetricFilter = createTraceMetricFilter(traceMetric);
 
-  const {attributes: numberTags} = useTraceItemAttributeKeys({
-    traceItemType: TraceItemDataset.TRACEMETRICS,
-    type: 'number',
+  const traceItemAttributeKeysOptions = useTraceItemAttributeKeysOptions();
+  const {data: numberTags} = useQuery({
+    ...traceItemAttributeKeysOptions({
+      traceItemType: TraceItemDataset.TRACEMETRICS,
+      type: 'number',
+      query: traceMetricFilter,
+    }),
     enabled: Boolean(traceMetricFilter),
-    query: traceMetricFilter,
+    select: selectTraceItemTagCollection('number'),
   });
-  const {attributes: stringTags} = useTraceItemAttributeKeys({
-    traceItemType: TraceItemDataset.TRACEMETRICS,
-    type: 'string',
+
+  const {data: stringTags} = useQuery({
+    ...traceItemAttributeKeysOptions({
+      traceItemType: TraceItemDataset.TRACEMETRICS,
+      type: 'string',
+      query: traceMetricFilter,
+    }),
     enabled: Boolean(traceMetricFilter),
-    query: traceMetricFilter,
+    select: selectTraceItemTagCollection('string'),
   });
-  const {attributes: booleanTags} = useTraceItemAttributeKeys({
-    traceItemType: TraceItemDataset.TRACEMETRICS,
-    type: 'boolean',
+
+  const {data: booleanTags} = useQuery({
+    ...traceItemAttributeKeysOptions({
+      traceItemType: TraceItemDataset.TRACEMETRICS,
+      type: 'boolean',
+      query: traceMetricFilter,
+    }),
     enabled: Boolean(traceMetricFilter),
-    query: traceMetricFilter,
+    select: selectTraceItemTagCollection('boolean'),
   });
 
   const visibleNumberTags = useMemo(() => {

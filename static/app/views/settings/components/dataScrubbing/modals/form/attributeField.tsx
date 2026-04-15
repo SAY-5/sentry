@@ -8,13 +8,15 @@ import {TextOverflow} from 'sentry/components/textOverflow';
 import {t} from 'sentry/locale';
 import type {TagCollection} from 'sentry/types/group';
 import type {Project} from 'sentry/types/project';
+import {useQuery} from 'sentry/utils/queryClient';
 import {useLocalStorageState} from 'sentry/utils/useLocalStorageState';
 import {useProjects} from 'sentry/utils/useProjects';
+import {TraceItemDataset} from 'sentry/views/explore/types';
 import {
   elideTagBasedAttributes,
-  useTraceItemAttributeKeys,
-} from 'sentry/views/explore/hooks/useTraceItemAttributeKeys';
-import {TraceItemDataset} from 'sentry/views/explore/types';
+  selectTraceItemTagCollection,
+  useTraceItemAttributeKeysOptions,
+} from 'sentry/views/explore/utils/traceItemAttributeKeysOptions';
 import {
   AllowedDataScrubbingDatasets,
   type AttributeSuggestion,
@@ -52,11 +54,14 @@ export function AttributeField({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(0);
 
-  const traceItemAttributeStringsResult = useTraceItemAttributeKeys({
-    enabled: true,
-    type: 'string',
-    traceItemType: TraceItemDataset.LOGS,
-    projects: project ? [project] : undefined,
+  const traceItemAttributeKeysOptions = useTraceItemAttributeKeysOptions();
+  const traceItemAttributeStringsResult = useQuery({
+    ...traceItemAttributeKeysOptions({
+      traceItemType: TraceItemDataset.LOGS,
+      type: 'string',
+      projects: project ? [project] : undefined,
+    }),
+    select: selectTraceItemTagCollection('string'),
   });
   const [suggestedAttributeValues, setSuggestedAttributeValues] = useLocalStorageState(
     `advanced-data-scrubbing.suggested-attribute-values:v2:${projectId ? projectId : 'all'}`,
@@ -68,19 +73,19 @@ export function AttributeField({
 
   useEffect(() => {
     if (
-      traceItemAttributeStringsResult.attributes &&
+      traceItemAttributeStringsResult.data &&
       !traceItemAttributeStringsResult.isLoading &&
       !traceItemAttributeStringsResult.error
     ) {
       // This limits the attributes you can see when selecting for pii scrubbing, but we have to currently as tags[] syntax is strictly invalid.
       // We should address this ultimately via fixing the trace item keys endpoint to emit the stored/relay-esque syntax at some point, instead of frontend hacks.
       setSuggestedAttributeValues(
-        elideTagBasedAttributes(traceItemAttributeStringsResult.attributes)
+        elideTagBasedAttributes(traceItemAttributeStringsResult.data)
       );
     }
   }, [
     onChange,
-    traceItemAttributeStringsResult.attributes,
+    traceItemAttributeStringsResult.data,
     traceItemAttributeStringsResult.isLoading,
     traceItemAttributeStringsResult.error,
     setSuggestedAttributeValues,
