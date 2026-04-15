@@ -4,14 +4,12 @@ import {CompactSelect} from '@sentry/scraps/compactSelect';
 import type {SelectOption} from '@sentry/scraps/compactSelect';
 import {OverlayTrigger} from '@sentry/scraps/overlayTrigger';
 
+import {usePageFilters} from 'sentry/components/pageFilters/usePageFilters';
 import {t} from 'sentry/locale';
 import {useQuery} from 'sentry/utils/queryClient';
+import {useOrganization} from 'sentry/utils/useOrganization';
 import {Mode} from 'sentry/views/explore/contexts/pageParamsContext/mode';
 import {useGroupByFields} from 'sentry/views/explore/hooks/useGroupByFields';
-import {
-  selectTraceItemTagCollection,
-  useTraceItemAttributeKeysOptions,
-} from 'sentry/views/explore/hooks/useTraceItemAttributeKeysOptions';
 import {HiddenTraceMetricGroupByFields} from 'sentry/views/explore/metrics/constants';
 import type {TraceMetric} from 'sentry/views/explore/metrics/metricQuery';
 import {createTraceMetricFilter} from 'sentry/views/explore/metrics/utils';
@@ -20,6 +18,10 @@ import {
   useSetQueryParamsGroupBys,
 } from 'sentry/views/explore/queryParams/context';
 import {TraceItemDataset} from 'sentry/views/explore/types';
+import {
+  selectTraceItemTagCollection,
+  traceItemAttributeKeysOptions,
+} from 'sentry/views/explore/utils/traceItemAttributeKeysOptions';
 
 interface GroupBySelectorProps {
   /**
@@ -34,14 +36,17 @@ interface GroupBySelectorProps {
  * and displays them as options in a compact select dropdown.
  */
 export function GroupBySelector({traceMetric}: GroupBySelectorProps) {
+  const {selection} = usePageFilters();
+  const organization = useOrganization();
   const groupBys = useQueryParamsGroupBys();
   const setGroupBys = useSetQueryParamsGroupBys();
 
   const traceMetricFilter = createTraceMetricFilter(traceMetric);
 
-  const traceItemAttributeKeysOptions = useTraceItemAttributeKeysOptions();
   const {data: numberTags, isLoading: numberTagsLoading} = useQuery({
     ...traceItemAttributeKeysOptions({
+      organization,
+      selection,
       traceItemType: TraceItemDataset.TRACEMETRICS,
       type: 'number',
       query: traceMetricFilter,
@@ -52,6 +57,8 @@ export function GroupBySelector({traceMetric}: GroupBySelectorProps) {
 
   const {data: stringTags, isLoading: stringTagsLoading} = useQuery({
     ...traceItemAttributeKeysOptions({
+      organization,
+      selection,
       traceItemType: TraceItemDataset.TRACEMETRICS,
       type: 'string',
       query: traceMetricFilter,
@@ -62,6 +69,8 @@ export function GroupBySelector({traceMetric}: GroupBySelectorProps) {
 
   const {data: booleanTags, isLoading: booleanTagsLoading} = useQuery({
     ...traceItemAttributeKeysOptions({
+      organization,
+      selection,
       traceItemType: TraceItemDataset.TRACEMETRICS,
       type: 'boolean',
       query: traceMetricFilter,
